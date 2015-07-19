@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="header-section">
+	<div class="row header-row">
+		<div class="span12 masthead">
+			<h1 class="heading">TODO console.</h1>
+		</div>
+	</div>
+</div>
+<div class="header-push">
+</div>
+<div>
+	<form action='/w_add_item' method='POST'> 
+		title: <input type="text" name="title">
+		<input type="submit" value="add item"> 
+	</form>
+</div>
+
+<p>Items</p>
+<ul>
+	{% for item in items %}
+	<li>
+		<form id="cf{{ item.item_id }}" action='/w_complete_item' method="POST">
+		{% if item.completed == True %}
+			<input type='checkbox' name='item_id' value={{ item.item_id }} onClick="completeItem(cf{{ item.item_id }})" checked><input type='hidden' name='item_id' value={{ item.item_id }}>
+		{% else %}
+			<input type='checkbox' name='item_id' value={{ item.item_id }} onClick="completeItem(cf{{ item.item_id }})">
+		{% endif %}
+		<strong>{{ item.title }}</strong>
+		<small>{{ item.creation_date|datetimeformat }}</small>
+		</form>
+	</li>
+	{% else %}
+	<li><em>There's no items so far.</em>
+	{% endfor %}
+</ul>
+
+{% endblock %}
