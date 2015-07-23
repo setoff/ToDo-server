@@ -192,6 +192,12 @@ def w_complete_item():
 		
 	return redirect(url_for('app_console'))
 
+@app.route('/w_wipe_all')
+def w_wipe_all():
+	get_db().close()
+	init_db()
+	return redirect(url_for('app_console'))
+
 # special file handlers
 @app.route('/favicon.ico')
 def favicon():
