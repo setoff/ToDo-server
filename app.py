@@ -114,7 +114,10 @@ def get_item(item_id):
 
 def edit_item(item_id, form):
 	app.logger.debug('editing item with id {}. new fields: {}'.format(item_id, form))
-	paramsStr = ', '.join(['%s = "%s"' % (key, value) for (key, value) in form.items()])
+	d = form.copy()
+	if 'completed' in d:
+		d['completion_date'] = int(time.time())
+	paramsStr = ', '.join(['%s = "%s"' % (key, value) for (key, value) in d.items()])
 	query = 'update TodoItem set ' + paramsStr + " where item_id = ?"
 	app.logger.debug('update query: "' + query + '"')
 	db = get_db()
