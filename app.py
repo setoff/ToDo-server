@@ -115,13 +115,23 @@ def get_item(item_id):
 def edit_item(item_id, form):
 	app.logger.debug('editing item with id {}. new fields: {}'.format(item_id, form))
 	d = form.copy()
-	if 'completed' in d:
-		d['completion_date'] = int(time.time())
-	paramsStr = ', '.join(['%s = "%s"' % (key, value) for (key, value) in d.items()])
+	if 'completed' in form:
+		if d['completed'] == '1':
+			app.logger.debug('completed is 1')
+			d['completion_date'] = int(time.time())
+		else:
+			app.logger.debug('completed is 0')
+			d['completion_date'] = None
+
+	
+	for (key, value) in d.items():
+		if value is None or value is 'null':
+			d[key] = 'NULL'
+
+	paramsStr = ', '.join(['%s = %s' % (key, value) for (key, value) in d.items()])
 	query = 'update TodoItem set ' + paramsStr + " where item_id = ?"
 	app.logger.debug('update query: "' + query + '"')
 	db = get_db()
-
 	try:
 		db.execute(query, [item_id])
 	except sqlite3.OperationalError, msg:
@@ -144,11 +154,11 @@ def itemEndpoint(item_id):
 	isItemExist = query_db('''select item_id from TodoItem where item_id = ?''', [item_id], one=True)
 	if isItemExist is None:
 		return jsonify(error='No item with id={}'.format(item_id)), 404
-
 	if request.method == 'GET':
 		return get_item(item_id)
 	elif request.method == 'POST':
-		return edit_item(item_id, request.form)
+		updatedItem = edit_item(item_id, request.form)
+		return updatedItem
 	elif request.method == 'DELETE':
 		return delete_item(item_id)
 	return jsonify(error='Method not supported'), 400
@@ -186,11 +196,11 @@ def w_complete_item():
 		app.logger.debug('checkpoint task: {}'.format(task))
 		if task["completed"] is 1:	
 			app.logger.debug('checkpoint Uncomplete-item')
-			params = {"completed": 0, "completion_date": None}
+			params = {"completed": '0', "completion_date": None}
 			edit_item(request.form['item_id'], params)
 		else:
 			app.logger.debug('checkpoint Complete-item')
-			params = {"completed": 1, "completion_date": int(time.time())}
+			params = {"completed": '1', "completion_date": int(time.time())}
 			edit_item(request.form['item_id'], params)
 		
 	return redirect(url_for('app_console'))
