@@ -127,6 +127,8 @@ def edit_item(item_id, form):
 	for (key, value) in d.items():
 		if value is None or value is 'null':
 			d[key] = 'NULL'
+		else:
+			d[key] = '"' + str(value) + '"' 
 
 	paramsStr = ', '.join(['%s = %s' % (key, value) for (key, value) in d.items()])
 	query = 'update TodoItem set ' + paramsStr + " where item_id = ?"
